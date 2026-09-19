@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automation Suite Pro - Adobe Illustrator</title>
+  <meta name="description" content="All-in-One Professional Automation Suite for Adobe Illustrator: BG Remover, Auto Page Resizer, and Icon Set Maker Pro.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ==================== APP WRAPPER ==================== -->
+  <div class="app-wrapper">
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="app-header">
+      <div class="header-top">
+        <div class="brand-group">
+          <div class="brand-icon">⚡</div>
+          <div class="brand-text">
+            <h1>AUTOMATION SUITE <span class="badge-pro">PRO v2.7</span></h1>
+            <p class="brand-sub">High-Efficiency Vector & Image Automation Suite</p>
+          </div>
+        </div>
+        <div class="header-status">
+          <button type="button" class="btn-license-header" id="btnHeaderLicenseDetails" title="View License Details">
+            <span class="license-icon">🔑</span>
+            <span class="license-text" id="headerLicenseStatusText">License Details</span>
+          </button>
+          <span class="status-indicator ready" id="globalStatusDot"></span>
+          <span class="status-text" id="globalStatusText">Ready</span>
+        </div>
+      </div>
+
+      <!-- TOOL SELECTOR DROPDOWN & PAGE ACTIONS -->
+      <div class="tool-dropdown-container">
+        <div class="tool-dropdown-header-row">
+          <label for="globalToolSelector" class="tool-dropdown-label">Active Automation Tool:</label>
+          <div class="page-action-buttons">
+            <button type="button" class="btn-page-action" id="btnHeaderRenamePage" title="Rename Active Page (or double-click tab)">
+              <span class="action-icon">✏️</span>
+              <span class="action-text">Rename</span>
+            </button>
+            <button type="button" class="btn-page-action" id="btnHeaderChangeIcon" title="Change Active Page Icon">
+              <span class="action-icon">🎨</span>
+              <span class="action-text">Icon</span>
+            </button>
+            <button type="button" class="btn-page-action btn-add-page" id="btnHeaderAddPage" title="Create New Page">
+              <span class="action-icon">➕</span>
+              <span class="action-text">New Page</span>
+            </button>
+          </div>
+        </div>
+        <div class="select-wrapper">
+          <select id="globalToolSelector" class="custom-select tool-select-master">
+            <option value="qualitySolve" selected>🛡️ Quality Solve (Adobe Stock Fixer)</option>
+            <option value="bgRemover">🪄 BG Remove (Background Cleaner)</option>
+            <option value="iconSetMaker">🧩 Icon Set Maker Pro (Grid Generator)</option>
+            <option value="pageResizer">📐 Page Resizer (Standard Dimensions)</option>
+            <option value="settingsLogs">⚙️ Logs & Global Config</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- NAVIGATION TABS -->
+      <nav class="nav-tabs" id="navTabsContainer" role="tablist">
+        <button class="nav-tab active" data-tab="qualitySolve" id="tabQualitySolve">
+          <span class="tab-icon">🛡️</span>
+          <span class="tab-name">Quality Solve</span>
+        </button>
+        <button class="nav-tab" data-tab="bgRemover" id="tabBgRemover">
+          <span class="tab-icon">🪄</span>
+          <span class="tab-name">BG Remove</span>
+        </button>
+        <button class="nav-tab" data-tab="iconSetMaker" id="tabIconMaker">
+          <span class="tab-icon">🧩</span>
+          <span class="tab-name">Icon Set Maker</span>
+        </button>
+        <button class="nav-tab" data-tab="pageResizer" id="tabResizer">
+          <span class="tab-icon">📐</span>
+          <span class="tab-name">Page Resizer</span>
+        </button>
+        <button class="nav-tab" data-tab="settingsLogs" id="tabSettings">
+          <span class="tab-icon">⚙️</span>
+          <span class="tab-name">Logs</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- ==================== UNIVERSAL FOLDERS BAR ==================== -->
+    <section class="universal-folder-card">
+      <div class="folder-header-row">
+        <span class="section-title">📂 Batch Folders</span>
+        <span class="file-counter-pill" id="fileCounterPill">0 files detected</span>
+      </div>
+
+      <!-- Input Folder -->
+      <div class="folder-input-group">
+        <div class="folder-label-tag">INPUT</div>
+        <div class="folder-path-display" id="inputPathDisplay" title="Click to browse or edit folder">
+          Select source folder containing .AI, .EPS, .SVG or images...
+        </div>
+        <button class="btn-browse" id="btnBrowseInput">Browse</button>
+      </div>
+
+      <!-- Output Folder -->
+      <div class="folder-input-group">
+        <div class="folder-label-tag">OUTPUT</div>
+        <div class="folder-path-display" id="outputPathDisplay" title="Click to browse or edit output folder">
+          Select destination folder (defaults to Input/Output)...
+        </div>
+        <button class="btn-browse" id="btnBrowseOutput">Browse</button>
+      </div>
+
+      <!-- Live File Breakdown Summary Card -->
+      <div class="file-detection-summary" id="fileDetectionSummary">
+        <div class="summary-top-row">
+          <div class="summary-total-badge">
+            <span class="pulse-circle"></span>
+            <span id="detectedTotalText"><strong>0</strong> Files Ready for Processing</span>
+          </div>
+          <button class="btn-toggle-filelist" id="btnToggleFileList" type="button">
+            👁️ View Files (<span id="detectedCountSmall">0</span>)
+          </button>
+        </div>
+
+        <!-- Format breakdown chips -->
+        <div class="format-breakdown-row" id="formatBreakdownRow">
+          <span class="breakdown-chip chip-ai">AI: <b id="cntAI">0</b></span>
+          <span class="breakdown-chip chip-eps">EPS: <b id="cntEPS">0</b></span>
+          <span class="breakdown-chip chip-svg">SVG: <b id="cntSVG">0</b></span>
+          <span class="breakdown-chip chip-pdf">PDF: <b id="cntPDF">0</b></span>
+          <span class="breakdown-chip chip-img">Images: <b id="cntRaster">0</b></span>
+        </div>
+
+        <!-- Expandable file list drawer -->
+        <div class="file-list-drawer hidden" id="fileListDrawer">
+          <div class="file-list-header">
+            <span class="file-list-title">Detected Files in Folder:</span>
+            <input type="text" id="filterFileListInput" placeholder="Quick search..." class="filter-input">
+          </div>
+          <div class="file-list-items" id="fileListItems">
+            <div class="file-item-empty">No files detected yet. Select an input folder.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== MAIN CONTENT AREA ==================== -->
+    <main class="main-content">
+
+      <!-- ============================================================ -->
+      <!-- TAB 0: QUALITY SOLVE (ADOBE STOCK FIXER)                    -->
+      <!-- ============================================================ -->
+      <div class="tab-panel active" id="panel-qualitySolve">
+        <div class="panel-intro">
+          <div class="intro-title">🛡️ Adobe Stock Quality Issue Solver</div>
+          <div class="intro-desc">Resolve vector rejection issues: clean stray points, ghost shapes, auto-outline fonts, clean masks, and auto-split multi-icon sheets into individual single files.</div>
+        </div>
+
+        <!-- Workflow Mode -->
+        <div class="card">
+          <div class="card-label">Workflow Mode</div>
+          <div class="select-wrapper">
+            <select id="qsModeSelect" class="custom-select">
+              <option value="inplace" selected>1. Clean Artboard In-Place (Preserve Exact Artboard Size & Position)</option>
+              <option value="split">2. Auto-Split Multi-Icons to Single Files (আলাদা আলাদা Single Icon)</option>
+            </select>
+          </div>
+          <div class="workflow-hint" id="qsWorkflowHint" style="margin-top: 8px; font-size: 11.5px; color: var(--accent-emerald);">
+            ✓ <b>Artboard Protected:</b> Original artboard dimensions and coordinates will remain 100% unchanged.
+          </div>
+        </div>
+
+        <!-- Stock Compliance Checklist -->
+        <div class="card">
+          <div class="card-label">Microstock Compliance Fixes</div>
+          <div class="toggle-list">
+            <label class="toggle-item">
+              <input type="checkbox" id="qsOptStrayPoints" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text"><b>Purge Stray Points & Ghost Paths:</b> Remove 0-area points & unpainted paths</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="qsOptAutoOutline" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text"><b>Auto-Outline All Fonts:</b> Convert live text to outlines (Adobe Stock mandatory)</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="qsOptEmptyMasks" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text"><b>Clean Empty Masks & Groups:</b> Remove unused clipping masks & empty groups</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="qsOptCleanBg" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text"><b>Remove Stray Background Cards:</b> Clean unwanted white canvas/bounding boxes</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Export Format -->
+        <div class="card">
+          <div class="card-label">Export Format</div>
+          <div class="chip-group" id="qsFormatChips">
+            <button class="chip active" data-fmt="eps">EPS (Illustrator 10)</button>
+            <button class="chip" data-fmt="ai">AI Master</button>
+            <button class="chip" data-fmt="svg">SVG</button>
+            <button class="chip" data-fmt="png">PNG (Transparent)</button>
+          </div>
+        </div>
+
+        <!-- Output File Naming & Sequential Numbering -->
+        <div class="card">
+          <div class="card-label">Output File Naming</div>
+          <div class="naming-mode-toggle">
+            <label class="radio-pill active" id="qsNameModeOrigLbl">
+              <input type="radio" name="qsNamingMode" value="original" checked>
+              <span>Original / Suffix</span>
+            </label>
+            <label class="radio-pill" id="qsNameModeCustomLbl">
+              <input type="radio" name="qsNamingMode" value="custom">
+              <span>Sequential Name (ক্রমানুযায়ী)</span>
+            </label>
+          </div>
+          <div class="naming-config-container hidden" id="qsNamingConfig" style="margin-top: 10px;">
+            <div class="naming-row">
+              <div class="naming-field">
+                <label>File Prefix / Base Name</label>
+                <input type="text" id="qsCustomPrefix" value="icon_" placeholder="e.g. icon_" class="custom-input">
+              </div>
+              <div class="naming-field" style="max-width: 90px;">
+                <label>Start #</label>
+                <input type="number" id="qsStartNum" value="1" min="1" class="custom-input">
+              </div>
+            </div>
+            <div class="preview-filename" id="qsPreviewName">⚡ Output preview: icon_01.eps, icon_02.eps ...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- TAB 1: BG REMOVER                                            -->
+      <!-- ============================================================ -->
+      <div class="tab-panel" id="panel-bgRemover">
+        <div class="panel-intro">
+          <div class="intro-title">Auto White & Background Removal</div>
+          <div class="intro-desc">Automatically detect & remove white backgrounds, compound paths, and clean vector shapes in bulk.</div>
+        </div>
+
+        <!-- Sensitivity / Tolerance -->
+        <div class="card">
+          <div class="card-title-row">
+            <span class="card-label">Sensitivity / Tolerance</span>
+            <span class="slider-badge" id="bgrToleranceVal">100</span>
+          </div>
+          <div class="slider-container">
+            <input type="range" id="bgrToleranceSlider" min="1" max="100" value="100" class="custom-slider">
+          </div>
+          <div class="slider-helper">
+            <span>Pure White (1)</span>
+            <span>Balanced (15)</span>
+            <span>Off-White / Cream (100)</span>
+          </div>
+        </div>
+
+        <!-- Options & Raster Support -->
+        <div class="card">
+          <div class="card-label">Processing Options</div>
+          <div class="toggle-list">
+            <label class="toggle-item">
+              <input type="checkbox" id="bgrOptPathItems" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text">Remove pure white vector paths & fills</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="bgrOptCompound" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text">Clean white compound paths</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="bgrOptRasterTrace" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text">Auto-Trace raster images & ignore white</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="bgrOptUngroupIcons" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text">Auto-Ungroup & Separate Multi-Icons (Independent Objects)</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="bgrOptPreserveSize" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text">Preserve Original Dimensions (No Page Resizing)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Export Formats -->
+        <div class="card">
+          <div class="card-label">Export Format</div>
+          <div class="chip-group" id="bgrFormatChips">
+            <button class="chip active" data-fmt="eps">EPS (Vector)</button>
+            <button class="chip" data-fmt="ai">AI Master</button>
+            <button class="chip" data-fmt="svg">SVG</button>
+            <button class="chip" data-fmt="png">PNG (Transparent)</button>
+          </div>
+        </div>
+
+        <!-- Output File Naming & Sequential Numbering -->
+        <div class="card">
+          <div class="card-label">Output File Naming</div>
+          <div class="naming-mode-toggle">
+            <label class="radio-pill active" id="bgrNameModeOrigLbl">
+              <input type="radio" name="bgrNamingMode" value="original" checked>
+              <span>Original Name</span>
+            </label>
+            <label class="radio-pill" id="bgrNameModeCustomLbl">
+              <input type="radio" name="bgrNamingMode" value="custom">
+              <span>Sequential Name (ক্রমানুযায়ী)</span>
+            </label>
+          </div>
+          <div class="naming-config-container hidden" id="bgrNamingConfig" style="margin-top: 10px;">
+            <div class="naming-row">
+              <div class="naming-field">
+                <label>File Prefix / Base Name</label>
+                <input type="text" id="bgrCustomPrefix" value="vector_clean_" placeholder="e.g. design_" class="custom-input">
+              </div>
+              <div class="naming-field" style="max-width: 90px;">
+                <label>Start #</label>
+                <input type="number" id="bgrStartNum" value="1" min="1" class="custom-input">
+              </div>
+            </div>
+            <div class="preview-filename" id="bgrPreviewName">⚡ Output preview: vector_clean_1.eps, vector_clean_2.eps ...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- TAB 2: PAGE RESIZER                                          -->
+      <!-- ============================================================ -->
+      <div class="tab-panel" id="panel-pageResizer">
+        <div class="panel-intro">
+          <div class="intro-title">Auto Artboard Resizer & Proportions</div>
+          <div class="intro-desc">Batch resize vector artwork to standard microstock dimensions with safe margins and centering.</div>
+        </div>
+
+        <!-- Target Dimensions Presets -->
+        <div class="card">
+          <div class="card-label">Target Artboard Preset</div>
+          <div class="select-wrapper">
+            <select id="resizerPresetSelect" class="custom-select">
+              <option value="4000x2663">Landscape Canvas (4000 × 2663 px)</option>
+              <option value="1000x350">Banner Canvas (1000 × 350 px)</option>
+              <option value="4000x4000">Square Canvas (4000 × 4000 px)</option>
+              <option value="custom">Custom Dimensions...</option>
+            </select>
+          </div>
+
+          <!-- Custom Dimensions -->
+          <div class="custom-dim-row hidden" id="resizerCustomDimRow">
+            <div class="dim-field">
+              <label>Width (px)</label>
+              <input type="number" id="resizerCustomW" value="4000" min="10" max="16000" class="custom-input">
+            </div>
+            <div class="dim-separator">×</div>
+            <div class="dim-field">
+              <label>Height (px)</label>
+              <input type="number" id="resizerCustomH" value="2663" min="10" max="16000" class="custom-input">
+            </div>
+          </div>
+        </div>
+
+        <!-- Safe Margin & Centering -->
+        <div class="card">
+          <div class="card-title-row">
+            <span class="card-label">Safe Margin Scale</span>
+            <span class="slider-badge" id="resizerMarginVal">88%</span>
+          </div>
+          <div class="slider-container">
+            <input type="range" id="resizerMarginSlider" min="50" max="100" value="88" class="custom-slider">
+          </div>
+          <div class="slider-helper">
+            <span>Tight (100%)</span>
+            <span>Recommended (88%)</span>
+            <span>Generous (70%)</span>
+          </div>
+
+          <div class="toggle-list" style="margin-top: 12px;">
+            <label class="toggle-item">
+              <input type="checkbox" id="resizerCenterArtwork" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text">Center artwork horizontally & vertically</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="resizerScaleStrokes" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text">Scale stroke weights & effects proportionally</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Export Formats -->
+        <div class="card">
+          <div class="card-label">Export Formats (Multi-Select Allowed)</div>
+          <div class="checkbox-format-row" id="resizerFormatCheckboxes">
+            <label class="chip-checkbox active">
+              <input type="checkbox" id="resizerFmtEPS" checked>
+              <span>EPS</span>
+            </label>
+            <label class="chip-checkbox">
+              <input type="checkbox" id="resizerFmtAI">
+              <span>AI</span>
+            </label>
+            <label class="chip-checkbox">
+              <input type="checkbox" id="resizerFmtSVG">
+              <span>SVG</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Output File Naming & Sequential Numbering -->
+        <div class="card">
+          <div class="card-label">Output File Naming</div>
+          <div class="naming-mode-toggle">
+            <label class="radio-pill active" id="resizerNameModeOrigLbl">
+              <input type="radio" name="resizerNamingMode" value="original" checked>
+              <span>Original Name</span>
+            </label>
+            <label class="radio-pill" id="resizerNameModeCustomLbl">
+              <input type="radio" name="resizerNamingMode" value="custom">
+              <span>Sequential Name (ক্রমানুযায়ী)</span>
+            </label>
+          </div>
+          <div class="naming-config-container hidden" id="resizerNamingConfig" style="margin-top: 10px;">
+            <div class="naming-row">
+              <div class="naming-field">
+                <label>File Prefix / Base Name</label>
+                <input type="text" id="resizerCustomPrefix" value="artboard_" placeholder="e.g. artboard_" class="custom-input">
+              </div>
+              <div class="naming-field" style="max-width: 90px;">
+                <label>Start #</label>
+                <input type="number" id="resizerStartNum" value="1" min="1" class="custom-input">
+              </div>
+            </div>
+            <div class="preview-filename" id="resizerPreviewName">⚡ Output preview: artboard_1.eps, artboard_2.eps ...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- TAB 3: ICON SET MAKER                                        -->
+      <!-- ============================================================ -->
+      <div class="tab-panel" id="panel-iconSetMaker">
+        <div class="panel-intro">
+          <div class="intro-title">Batch Vector Icon Set Generator</div>
+          <div class="intro-desc">Pack individual icons into clean, standardized grid sheets with auto margins and direct vector embedding.</div>
+        </div>
+
+        <!-- Canvas Preset -->
+        <div class="card">
+          <div class="card-label">Canvas & Grid Preset</div>
+          <div class="select-wrapper">
+            <select id="iconPresetSelect" class="custom-select">
+              <option value="0">5 × 3 Grid (4000 × 2663 px) — 15 Icons / Sheet</option>
+              <option value="1">5 × 2 Grid (1000 × 350 px) — 10 Icons / Sheet</option>
+              <option value="2">4 × 3 Grid (4000 × 4000 px) — 12 Icons / Sheet</option>
+              <option value="3">Custom Grid & Canvas...</option>
+            </select>
+          </div>
+
+          <!-- Custom Grid Config -->
+          <div class="grid-config-row" id="iconCustomGridRow" style="margin-top: 10px;">
+            <div class="dim-field">
+              <label>Columns</label>
+              <input type="number" id="iconCols" value="5" min="1" max="25" class="custom-input">
+            </div>
+            <div class="dim-separator">×</div>
+            <div class="dim-field">
+              <label>Rows</label>
+              <input type="number" id="iconRows" value="3" min="1" max="25" class="custom-input">
+            </div>
+            <div class="icon-count-badge" id="iconSetCalcBadge">
+              15 icons / sheet
+            </div>
+          </div>
+        </div>
+
+        <!-- Background & Canvas Settings -->
+        <div class="card">
+          <div class="card-label">Canvas Mode</div>
+          <div style="padding: 10px 12px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; font-size: 11.5px; color: #e2e8f0; display: flex; align-items: center; gap: 9px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span><strong>Pure Transparent Sheet:</strong> Zero background rectangles or extra shapes added. Clean vector icons only.</span>
+          </div>
+        </div>
+
+        <!-- Naming & Format -->
+        <div class="card">
+          <div class="card-label">Naming & Export Format</div>
+          <div class="naming-row">
+            <div class="naming-field">
+              <label>File Prefix / Base Name</label>
+              <input type="text" id="iconPrefix" value="icon_set_" class="custom-input">
+            </div>
+            <div class="naming-field" style="max-width: 90px;">
+              <label>Start #</label>
+              <input type="number" id="iconStartNum" value="1" min="1" class="custom-input">
+            </div>
+          </div>
+
+          <div class="format-radio-row" style="margin-top: 10px;">
+            <label class="radio-pill active">
+              <input type="radio" name="iconSaveFormat" value="EPS" checked>
+              <span>EPS (Illustrator 10)</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="iconSaveFormat" value="AI">
+              <span>AI Master</span>
+            </label>
+          </div>
+          <div class="preview-filename" id="iconPreviewName">⚡ Output preview: icon_set_1.eps, icon_set_2.eps ...</div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- TAB 4: SETTINGS & LOGS                                       -->
+      <!-- ============================================================ -->
+      <div class="tab-panel" id="panel-settingsLogs">
+        <div class="panel-intro">
+          <div class="intro-title">Microstock Compatibility & Live Terminal</div>
+          <div class="intro-desc">Manage stock compliance settings and inspect real-time execution logs.</div>
+        </div>
+
+        <!-- Global Engine Settings -->
+        <div class="card">
+          <div class="card-label">Global Stock Site Defaults</div>
+          <div class="toggle-list">
+            <label class="toggle-item">
+              <input type="checkbox" id="cfgAutoOutlineText" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text"><b>Auto-Outline Text:</b> Convert all fonts to paths before saving EPS</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="cfgEps10Mode" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text"><b>EPS 10 Compatibility:</b> Export legacy Illustrator 10 EPS</span>
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="cfgSuppressAlerts" checked>
+              <span class="toggle-custom"></span>
+              <span class="toggle-text"><b>Silent Batch Mode:</b> Suppress Illustrator alert popups during execution</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Live Terminal Log -->
+        <div class="card">
+          <div class="card-title-row">
+            <span class="card-label">Execution Console</span>
+            <div class="log-actions">
+              <button class="btn-text-action" id="btnClearLog">Clear</button>
+              <button class="btn-text-action" id="btnExportLog">Export Log</button>
+            </div>
+          </div>
+          <div class="terminal-box" id="terminalLog">
+            <div class="log-line info">[System] Automation Suite Pro v2.7 initialized.</div>
+            <div class="log-line info">[Ready] Automation Suite ready.</div>
+          </div>
+        </div>
+      </div>
+      <!-- Container for dynamically created custom pages / panels -->
+      <div id="customPanelsContainer"></div>
+
+    </main>
+
+    <!-- ==================== STICKY ACTION FOOTER ==================== -->
+    <footer class="app-footer">
+
+      <!-- Progress Area -->
+      <div class="progress-container hidden" id="progressContainer">
+        <div class="progress-header">
+          <span class="progress-title" id="progressStatusText">Processing files...</span>
+          <span class="progress-percent" id="progressPercentText">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-bar-glow" id="progressBar"></div>
+        </div>
+        <div class="progress-sub-text" id="progressFileName">Preparing queue...</div>
+      </div>
+
+      <!-- Result Summary Card -->
+      <div class="result-summary-card hidden" id="resultSummaryCard">
+        <div class="result-header">
+          <span class="result-badge-success" id="resultBadge">✅ COMPLETED</span>
+          <span class="result-time" id="resultElapsedTime">0.0s</span>
+        </div>
+        <div class="result-stats-grid">
+          <div class="stat-box">
+            <div class="stat-val" id="statProcessed">0</div>
+            <div class="stat-lbl">Processed</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val text-success" id="statSuccess">0</div>
+            <div class="stat-lbl">Successful</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val text-danger" id="statFailed">0</div>
+            <div class="stat-lbl">Failed</div>
+          </div>
+        </div>
+        <div class="result-buttons-row">
+          <button class="btn-secondary" id="btnOpenOutputFolder">📂 Open Output</button>
+          <button class="btn-secondary" id="btnResetBatch">🔄 Reset</button>
+        </div>
+      </div>
+
+      <!-- Master Action Button -->
+      <button class="btn-master-action" id="btnStartBatch" disabled>
+        <span class="btn-icon" id="btnStartBatchIcon">🛡️</span>
+        <span class="btn-label" id="btnStartBatchLabel">Start Quality Solve & Clean</span>
+      </button>
+
+    </footer>
+
+  </div>
+
+  <!-- ==================== LICENSE KEY ACTIVATION MODAL (MANDATORY GATEWAY) ==================== -->
+  <div class="modal-backdrop hidden" id="modalLicenseKey">
+    <div class="modal-card license-activation-card">
+      <div class="modal-brand-header">
+        <div class="joynest-tag">
+          <span class="joynest-logo-dot">⚡</span>
+          <span class="joynest-brand-name">This is a product by JoyNest Agency</span>
+        </div>
+        <h2 class="modal-title">🔐 License Activation Required</h2>
+        <p class="modal-subtitle">A valid License Key is required to access and use this product.<br>Please provide the required information and activate your license to continue.</p>
+      </div>
+
+      <div class="modal-body">
+        <!-- Full Name -->
+        <div class="license-prompt-box">
+          <label for="inputLicenseName" class="license-input-label">Full Name:</label>
+          <div class="license-input-wrap">
+            <input type="text" id="inputLicenseName" class="license-input-field" placeholder="Enter your name" autocomplete="name" spellcheck="false">
+          </div>
+        </div>
+
+        <!-- Email Address -->
+        <div class="license-prompt-box">
+          <label for="inputLicenseEmail" class="license-input-label">Email Address:</label>
+          <div class="license-input-wrap">
+            <input type="email" id="inputLicenseEmail" class="license-input-field" placeholder="Enter your email address" autocomplete="email" spellcheck="false">
+          </div>
+        </div>
+
+        <!-- License Key with Eye Button -->
+        <div class="license-prompt-box">
+          <label for="inputLicenseKey" class="license-input-label">License Key:</label>
+          <div class="license-input-wrap key-input-with-eye">
+            <input type="password" id="inputLicenseKey" class="license-input-field" placeholder="Enter your License Key" autocomplete="off" spellcheck="false">
+            <button type="button" class="btn-input-eye" id="btnToggleInputKeyEye" title="Show / Hide License Key">
+              <span id="inputEyeIcon">👁️</span>
+            </button>
+          </div>
+          <p class="license-helper-text">Manual input required. Paste or type your official key.</p>
+        </div>
+
+        <!-- Connect Support -->
+        <div class="license-connect-box">
+          <span class="connect-label">Connect for Licences Key:</span>
+          <div class="connect-links">
+            <a href="https://wa.me/8801700000000" target="_blank" class="connect-chip" id="linkConnectSupport">
+              <span class="chip-icon">💬</span> WhatsApp
+            </a>
+            <a href="mailto:support@joynestagency.com" target="_blank" class="connect-chip">
+              <span class="chip-icon">✉️</span> Email JoyNest
+            </a>
+          </div>
+        </div>
+
+        <div class="modal-error-alert hidden" id="licenseActivationError"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary hidden" id="btnCloseLicenseKeyModal">Cancel</button>
+        <button type="button" class="btn-primary-glow" id="btnSubmitActivateLicense">
+          <span class="btn-spinner hidden" id="spinnerActivate"></span>
+          <span id="btnSubmitActivateText">Activate License</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LICENSE DETAILS MODAL ==================== -->
+  <div class="modal-backdrop hidden" id="modalLicenseDetails">
+    <div class="modal-card license-details-card">
+      <div class="modal-brand-header">
+        <div class="joynest-tag">
+          <span class="joynest-logo-dot">⚡</span>
+          <span class="joynest-brand-name">This is a product by JoyNest Agency</span>
+        </div>
+        <h2 class="modal-title">License Information</h2>
+        <p class="modal-subtitle">Active Device & Subscription Details</p>
+      </div>
+
+      <div class="modal-body">
+        <div class="license-info-grid">
+          <!-- Status -->
+          <div class="info-row">
+            <span class="info-label">License Status:</span>
+            <span class="info-badge status-active" id="detailLicenseStatus">Activated</span>
+          </div>
+
+          <!-- License Key with Eye Button -->
+          <div class="info-row">
+            <span class="info-label">License Key:</span>
+            <div class="masked-key-container">
+              <span class="masked-key-text" id="detailLicenseKey">••••••••••••••••••••</span>
+              <button type="button" class="btn-eye-toggle" id="btnToggleKeyVisibility" title="Show/Hide License Key">
+                <span id="eyeIcon">👁️</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Activated Time (BST) -->
+          <div class="info-row">
+            <span class="info-label">Activated Date:</span>
+            <span class="info-val" id="detailActivatedDate">-</span>
+          </div>
+
+          <!-- Expiry Time (BST) -->
+          <div class="info-row">
+            <span class="info-label">Expires On:</span>
+            <span class="info-val text-highlight" id="detailExpiryDate">-</span>
+          </div>
+
+          <!-- Remaining Validity -->
+          <div class="info-row">
+            <span class="info-label">Remaining Validity:</span>
+            <span class="info-val text-success" id="detailRemainingValidity">-</span>
+          </div>
+
+          <!-- Device Status & ID -->
+          <div class="info-row">
+            <span class="info-label">Device Status:</span>
+            <span class="info-val" id="detailDeviceStatus">Matched (<span id="detailDeviceId">DEV-XXXX</span>)</span>
+          </div>
+
+          <!-- Last Verified (BST) -->
+          <div class="info-row">
+            <span class="info-label">Last Verified:</span>
+            <span class="info-val text-highlight" id="detailLastVerified">-</span>
+          </div>
+
+          <!-- Next Verification (BST) -->
+          <div class="info-row">
+            <span class="info-label">Next Verification:</span>
+            <span class="info-val" id="detailNextVerification">-</span>
+          </div>
+
+          <!-- Deactivation Policy -->
+          <div class="info-row">
+            <span class="info-label">Deactivation & Reuse:</span>
+            <span class="info-val" id="detailDeactivationCount">0 / 1 used (1-time reuse eligible)</span>
+          </div>
+        </div>
+
+        <div class="license-connect-box" style="margin-top: 14px;">
+          <span class="connect-label">Connect for Licences Key / Renewal:</span>
+          <div class="connect-links">
+            <a href="https://wa.me/8801700000000" target="_blank" class="connect-chip">
+              <span class="chip-icon">💬</span> JoyNest Support
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer modal-footer-split">
+        <button type="button" class="btn-danger-outline" id="btnDeactivateLicense">Deactivate License</button>
+        <div class="modal-footer-right">
+          <button type="button" class="btn-secondary" id="btnCloseLicenseDetails">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PROFESSIONAL RENAME PAGE MODAL ==================== -->
+  <div class="modal-backdrop hidden" id="modalRenamePage" role="dialog" aria-modal="true" aria-labelledby="renameModalTitle">
+    <div class="modal-card rename-modal-card">
+      <div class="modal-header-row">
+        <div>
+          <h2 class="modal-title" id="renameModalTitle">Rename Page</h2>
+          <p class="modal-subtitle" id="renameModalSubtitle">Update the name of this page.</p>
+        </div>
+        <button type="button" class="btn-modal-close" id="btnCloseRenameModal" title="Close (Esc)">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="rename-input-group">
+          <div class="rename-label-row">
+            <label for="inputRenamePage" class="rename-input-label">Page name</label>
+            <span class="rename-char-counter" id="renameCharCounter">0 / 40</span>
+          </div>
+          <div class="rename-input-wrapper">
+            <input type="text" id="inputRenamePage" class="rename-input-field" placeholder="Enter page name..." maxlength="40" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="rename-error-msg hidden" id="renameErrorAlert"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnCancelRename">Cancel</button>
+        <button type="button" class="btn-primary-glow" id="btnSubmitRename">
+          <span class="btn-spinner hidden" id="spinnerRename"></span>
+          <span id="btnSubmitRenameText">Save</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== INDEPENDENT ICON PICKER MODAL ==================== -->
+  <div class="modal-backdrop hidden" id="modalIconPicker" role="dialog" aria-modal="true" aria-labelledby="iconPickerTitle">
+    <div class="modal-card icon-picker-card">
+      <div class="modal-header-row">
+        <div>
+          <h2 class="modal-title" id="iconPickerTitle">Change Page Icon</h2>
+          <p class="modal-subtitle" id="iconPickerSubtitle">Choose an independent icon for this page.</p>
+        </div>
+        <button type="button" class="btn-modal-close" id="btnCloseIconPicker" title="Close (Esc)">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="target-page-indicator">
+          <span class="indicator-label">Target Page:</span>
+          <span class="indicator-target" id="iconPickerTargetBadge"><b id="iconPickerTargetIcon">🛡️</b> <span id="iconPickerTargetName">Quality Solve</span></span>
+        </div>
+
+        <div class="icon-preset-title">Select Preset Icon</div>
+        <div class="icon-picker-grid" id="iconPickerGrid">
+          <!-- Icons will be rendered or preset -->
+        </div>
+
+        <div class="custom-icon-row">
+          <label for="inputCustomIcon" class="custom-icon-label">Or type/paste custom emoji:</label>
+          <div class="custom-icon-wrap">
+            <input type="text" id="inputCustomIcon" class="custom-icon-input" placeholder="e.g. 🚀" maxlength="4">
+            <button type="button" class="btn-secondary btn-apply-custom-icon" id="btnApplyCustomIcon">Apply</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="btnCancelIconPicker">Cancel</button>
+        <button type="button" class="btn-primary-glow" id="btnConfirmIconPicker">Select Icon</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PROFESSIONAL ALERT MODAL ==================== -->
+  <div class="modal-backdrop hidden" id="modalCustomAlert">
+    <div class="modal-card alert-modal-card">
+      <div class="alert-icon-wrap" id="customAlertIconWrap">
+        <span id="customAlertIcon">🛡️</span>
+      </div>
+      <h3 class="alert-title" id="customAlertTitle">License Verification</h3>
+      <p class="alert-message" id="customAlertMessage">Alert message details.</p>
+      <div class="modal-footer alert-footer">
+        <button type="button" class="btn-secondary hidden" id="btnCustomAlertCancel">Cancel</button>
+        <button type="button" class="btn-primary-glow" id="btnCustomAlertOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCRIPTS ==================== -->
+  <script src="js/CSInterface.js"></script>
+  <script src="js/licenseManager.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
