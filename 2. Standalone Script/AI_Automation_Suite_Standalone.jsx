@@ -5860,31 +5860,17 @@
     // -------------------------------------------------------------------------
     // GRADIENT MAKER (TOOL 6) - PROCEDURAL ANTIGRAVITY MESH GRADIENT ENGINE
     // -------------------------------------------------------------------------
-    var GRADIENT_HARMONIES = [
-        "antigravity_nebula", "holographic_liquid", "quantum_aurora", 
-        "cyber_neon_flux", "ethereal_glass", "deep_space_plasma", 
-        "bioluminescent_ocean", "sunset_overdrive", "neon_twilight"
-    ];
-
     var THEME_HARMONY_MAP = [
-        // 0: All Themes (Random Mix)
-        [
-            "antigravity_nebula", "holographic_liquid", "quantum_aurora", 
-            "cyber_neon_flux", "ethereal_glass", "deep_space_plasma", 
-            "bioluminescent_ocean", "sunset_overdrive", "neon_twilight"
-        ],
-        // 1: Holographic & Fluid (হলোগ্রাফিক এবং ফ্লুইড)
-        ["holographic_liquid", "ethereal_glass"],
-        // 2: Deep Space & Cyberpunk (ডার্ক স্পেস এবং সাইবারপাংক)
-        ["cyber_neon_flux", "deep_space_plasma", "antigravity_nebula"],
-        // 3: Bioluminescent Nature (প্রাকৃতিক এবং শান্ত)
-        ["bioluminescent_ocean"],
-        // 4: Quantum & Aurora (কোয়ান্টাম এবং অরোরা)
-        ["quantum_aurora", "neon_twilight"]
+        ["holographic_fluid", "deep_space_cyberpunk", "bioluminescent_nature", "quantum_aurora"],
+        ["holographic_fluid", "holo_prism", "liquid_pastel", "iridescent_silk"],
+        ["deep_space_cyberpunk", "cyber_grid", "deep_space_plasma", "neon_synthwave"],
+        ["bioluminescent_nature", "bioluminescent_ocean", "emerald_glow", "mystic_forest"],
+        ["quantum_aurora", "polar_lights", "solar_flare_plasma", "celestial_curtain"]
     ];
 
     function createGradientPRNG(seed) {
-        var s = (seed >>> 0) || Math.floor(Math.random() * 1000000000) + 1;
+        var s = (Number(seed) >>> 0) || 123456789;
+        if (s === 0) s = 123456789;
         return function () {
             s = (s * 1664525 + 1013904223) >>> 0;
             return s / 4294967296;
@@ -5893,6 +5879,8 @@
 
     function gradHslToRgb(h, s, l) {
         h = ((h % 360) + 360) % 360;
+        s = Math.max(0, Math.min(1, s));
+        l = Math.max(0, Math.min(1, l));
         var c = (1 - Math.abs(2 * l - 1)) * s;
         var x = c * (1 - Math.abs(((h / 60) % 2) - 1));
         var m = l - c / 2;
@@ -5912,129 +5900,189 @@
         };
     }
 
-    function generateGradientColors(harmony, numStops, rng) {
-        var baseHue = Math.floor(rng() * 360);
+    function generateThemeColors(themeIdx, numStops, rng) {
         var stops = [];
         var hues = [];
         var sats = [];
         var lights = [];
 
-        if (harmony === "antigravity_nebula") {
-            var pal = [260, 290, 320, 220]; // Purples and dark blues
+        // Theme 1: Holographic & Fluid (cyan, magenta, violet, electric blue, pink, lavender, mint)
+        if (themeIdx === 1) {
+            var holoPals = [
+                [185, 315, 275, 215, 345], // Cyan, Magenta, Violet, Blue, Pink
+                [280, 190, 330, 260, 165], // Violet, Cyan, Hot Pink, Lavender, Mint
+                [210, 285, 350, 180, 240]  // Electric Blue, Purple, Rose, Aqua, Indigo
+            ];
+            var pal1 = holoPals[Math.floor(rng() * holoPals.length)];
+            var shift1 = (rng() * 30 - 15);
             for (var i = 0; i < numStops; i++) {
-                hues.push(pal[i % pal.length] + (rng() * 20 - 10));
-                sats.push(0.80 + rng() * 0.20);
-                lights.push(0.15 + (i / numStops) * 0.40);
+                hues.push((pal1[i % pal1.length] + shift1 + (rng() * 16 - 8) + 360) % 360);
+                sats.push(0.70 + rng() * 0.25);
+                lights.push(0.40 + (i / Math.max(1, numStops - 1)) * 0.35);
             }
-        } else if (harmony === "holographic_liquid") {
-            var pal = [300, 180, 240, 330]; // Pink, Cyan, Violet
-            for (var i = 0; i < numStops; i++) {
-                hues.push(pal[i % pal.length]);
-                sats.push(0.70 + rng() * 0.30);
-                lights.push(0.50 + rng() * 0.30);
-            }
-        } else if (harmony === "quantum_aurora") {
-            var pal = [140, 180, 220, 280]; // Greens, Cyans, Purples
-            for (var i = 0; i < numStops; i++) {
-                hues.push(pal[i % pal.length]);
+        }
+        // Theme 2: Deep Space & Cyberpunk (navy, indigo, violet, electric blue, magenta, deep purple)
+        else if (themeIdx === 2) {
+            var spacePals = [
+                [235, 270, 325, 185, 295], // Navy, Violet, Neon Magenta, Cyan, Purple
+                [250, 285, 315, 220, 195], // Dark Indigo, Ultraviolet, Pink, Blue, Neon Cyan
+                [225, 260, 290, 340, 210]  // Deep Blue, Indigo, Violet, Neon Crimson, Cyan
+            ];
+            var pal2 = spacePals[Math.floor(rng() * spacePals.length)];
+            var shift2 = (rng() * 20 - 10);
+            for (var j = 0; j < numStops; j++) {
+                hues.push((pal2[j % pal2.length] + shift2 + (rng() * 12 - 6) + 360) % 360);
                 sats.push(0.85 + rng() * 0.15);
-                lights.push(0.30 + rng() * 0.30);
+                lights.push(0.10 + (j / Math.max(1, numStops - 1)) * 0.45);
             }
-        } else if (harmony === "cyber_neon_flux") {
-            var pal = [320, 190, 50, 280]; // Hot pink, cyan, yellow
-            for (var i = 0; i < numStops; i++) {
-                hues.push(pal[i % pal.length]);
-                sats.push(0.90 + rng() * 0.10);
-                lights.push(0.45 + rng() * 0.20);
+        }
+        // Theme 3: Bioluminescent Nature (teal, emerald, aqua, marine blue, lime accents, deep green)
+        else if (themeIdx === 3) {
+            var bioPals = [
+                [175, 155, 195, 215, 90],  // Teal, Emerald, Aqua, Marine, Lime
+                [160, 185, 205, 140, 105], // Deep Green, Aqua, Ocean Blue, Leaf, Lime
+                [190, 165, 225, 150, 80]   // Cyan-Teal, Emerald, Deep Marine, Mint, Chartreuse
+            ];
+            var pal3 = bioPals[Math.floor(rng() * bioPals.length)];
+            var shift3 = (rng() * 20 - 10);
+            for (var k = 0; k < numStops; k++) {
+                hues.push((pal3[k % pal3.length] + shift3 + (rng() * 14 - 7) + 360) % 360);
+                sats.push(0.78 + rng() * 0.20);
+                lights.push(0.18 + (k / Math.max(1, numStops - 1)) * 0.42);
             }
-        } else if (harmony === "ethereal_glass") {
-            for (var i = 0; i < numStops; i++) {
-                hues.push((baseHue + i * (360 / numStops)) % 360);
-                sats.push(0.20 + rng() * 0.30); 
-                lights.push(0.80 + rng() * 0.15); 
+        }
+        // Theme 4: Quantum & Aurora (polar green, polar cyan, ice blue, violet, magenta, mint)
+        else if (themeIdx === 4) {
+            var auroraPals = [
+                [145, 180, 215, 275, 315], // Polar Green, Cyan, Blue, Violet, Magenta
+                [160, 195, 260, 310, 135], // Neon Mint, Cyan, Purple, Magenta, Aurora Green
+                [180, 220, 285, 325, 150]  // Ice Cyan, Electric Blue, Violet, Pink, Polar Emerald
+            ];
+            var pal4 = auroraPals[Math.floor(rng() * auroraPals.length)];
+            var shift4 = (rng() * 24 - 12);
+            for (var m = 0; m < numStops; m++) {
+                hues.push((pal4[m % pal4.length] + shift4 + (rng() * 16 - 8) + 360) % 360);
+                sats.push(0.85 + rng() * 0.15);
+                lights.push(0.22 + (m / Math.max(1, numStops - 1)) * 0.48);
             }
-        } else if (harmony === "deep_space_plasma") {
-            var pal = [230, 260, 280, 300]; 
-            for (var i = 0; i < numStops; i++) {
-                hues.push(pal[i % pal.length] + rng()*10);
-                sats.push(0.90 + rng() * 0.10);
-                lights.push(0.10 + (i / numStops) * 0.30); 
-            }
-        } else if (harmony === "bioluminescent_ocean") {
-            var pal = [200, 220, 160, 240];
-            for (var i = 0; i < numStops; i++) {
-                hues.push(pal[i % pal.length]);
-                sats.push(0.80 + rng() * 0.20);
-                lights.push(0.25 + rng() * 0.25);
-            }
-        } else {
-            for (var i = 0; i < numStops; i++) {
-                hues.push((baseHue + i * 55) % 360);
-                sats.push(0.75 + rng() * 0.25);
-                lights.push(0.35 + (i / Math.max(1, numStops - 1)) * 0.45);
+        }
+        // Theme 0: All Themes (Random Mix fallback)
+        else {
+            var baseH = Math.floor(rng() * 360);
+            for (var n = 0; n < numStops; n++) {
+                hues.push((baseH + n * (180 / Math.max(1, numStops - 1)) + rng() * 20 - 10 + 360) % 360);
+                sats.push(0.75 + rng() * 0.22);
+                lights.push(0.20 + (n / Math.max(1, numStops - 1)) * 0.45);
             }
         }
 
+        // Strictly ordered, non-duplicate ramp points covering 0 to 100
         var rampPoints = [];
-        if (numStops === 2) {
+        if (numStops <= 2) {
             rampPoints = [0, 100];
         } else if (numStops === 3) {
-            rampPoints = [0, Math.round(35 + rng() * 30), 100];
+            var p3 = Math.round(35 + rng() * 30);
+            rampPoints = [0, p3, 100];
         } else if (numStops === 4) {
-            rampPoints = [0, Math.round(22 + rng() * 18), Math.round(58 + rng() * 18), 100];
+            var p4_1 = Math.round(20 + rng() * 15);
+            var p4_2 = Math.round(p4_1 + 25 + rng() * 20);
+            rampPoints = [0, p4_1, Math.min(92, p4_2), 100];
+        } else if (numStops === 5) {
+            var p5_1 = Math.round(15 + rng() * 12);
+            var p5_2 = Math.round(p5_1 + 18 + rng() * 12);
+            var p5_3 = Math.round(p5_2 + 18 + rng() * 12);
+            rampPoints = [0, p5_1, p5_2, Math.min(92, p5_3), 100];
         } else {
-            rampPoints = [0, Math.round(18 + rng() * 12), Math.round(44 + rng() * 12), Math.round(70 + rng() * 12), 100];
+            rampPoints.push(0);
+            var cur = 0;
+            var step = 90 / (numStops - 1);
+            for (var sIdx = 1; sIdx < numStops - 1; sIdx++) {
+                cur += Math.round(step * 0.7 + rng() * step * 0.6);
+                if (cur >= 95) cur = 90;
+                rampPoints.push(cur);
+            }
+            rampPoints.push(100);
         }
 
-        for (var i = 0; i < numStops; i++) {
-            var rgb = gradHslToRgb(hues[i], sats[i], lights[i]);
+        for (var s = 0; s < numStops; s++) {
+            var rgb = gradHslToRgb(hues[s], sats[s], lights[s]);
             stops.push({
                 r: rgb.r,
                 g: rgb.g,
                 b: rgb.b,
-                rampPoint: rampPoints[i],
+                rampPoint: rampPoints[s],
                 midPoint: Math.round(38 + rng() * 24)
             });
         }
         return stops;
     }
 
-    function generateGradientParameters(seed, retryIndex, themeIdx) {
+    function generateGradientParameters(seed, retryIndex, themeIdx, adv) {
         var rng = createGradientPRNG(seed);
-        var isRadial = (rng() < 0.25);
-        var type = isRadial ? "radial" : "linear";
+        adv = adv || {};
+
+        var effTheme = themeIdx;
+        if (effTheme === 0 || effTheme === undefined) {
+            effTheme = 1 + Math.floor(rng() * 4);
+        }
+
+        var archetypePool = [];
+        if (effTheme === 1) { // Holographic & Fluid
+            archetypePool = ["fluid_abstract", "holographic_sheen", "fluid_abstract", "orb_glow", "holographic_sheen"];
+        } else if (effTheme === 2) { // Deep Space & Cyberpunk
+            archetypePool = ["deep_space_cosmic", "deep_space_cosmic", "orb_glow", "holographic_sheen", "orb_glow"];
+        } else if (effTheme === 3) { // Bioluminescent Nature
+            archetypePool = ["orb_glow", "fluid_abstract", "aurora_waves", "orb_glow", "fluid_abstract"];
+        } else if (effTheme === 4) { // Quantum & Aurora
+            archetypePool = ["aurora_waves", "aurora_waves", "fluid_abstract", "orb_glow", "aurora_waves"];
+        } else {
+            archetypePool = ["orb_glow", "fluid_abstract", "aurora_waves", "holographic_sheen", "deep_space_cosmic"];
+        }
+
+        var archIdx = (Math.floor(rng() * archetypePool.length) + (retryIndex || 0)) % archetypePool.length;
+        var archetype = archetypePool[archIdx];
+
+        var isRadial = (archetype === "deep_space_cosmic") ? (rng() < 0.60) : (rng() < 0.25);
+        var baseType = isRadial ? "radial" : "linear";
 
         var angle = 0;
         if (!isRadial) {
-            angle = Math.floor(rng() * 24) * 15;
+            var angles = [0, 30, 45, 60, 90, 120, 135, 150, 180, 210, 225, 240, 270, 300, 315, 330];
+            angle = angles[Math.floor(rng() * angles.length)];
         }
 
-        // Generate 3 to 5 base stops for a rich background
-        var numStops = 3 + Math.floor(rng() * 3); 
-
-        var harmonyPool = GRADIENT_HARMONIES;
-        if (typeof themeIdx === "number" && themeIdx >= 0 && themeIdx < THEME_HARMONY_MAP.length) {
-            harmonyPool = THEME_HARMONY_MAP[themeIdx];
+        var numStops = 4;
+        var complexity = adv.complexity || "balanced";
+        if (complexity === "minimal") {
+            numStops = 2 + Math.floor(rng() * 2);
+        } else if (complexity === "rich") {
+            numStops = 5 + Math.floor(rng() * 3);
+        } else {
+            numStops = 3 + Math.floor(rng() * 3);
         }
 
-        var harmonyIdx = (Math.floor(rng() * harmonyPool.length) + (retryIndex || 0)) % harmonyPool.length;
-        var harmony = harmonyPool[harmonyIdx];
-
-        var stops = generateGradientColors(harmony, numStops, rng);
+        var stops = generateThemeColors(effTheme, numStops, rng);
+        var secondaryCount = 3 + Math.floor(rng() * 4);
+        var glowIntensity = (adv.glowIntensity === "subtle") ? 0.6 : ((adv.glowIntensity === "vibrant") ? 1.4 : 1.0);
 
         return {
             seed: seed,
-            type: type,
+            themeIdx: effTheme,
+            origThemeIdx: themeIdx,
+            archetype: archetype,
+            baseType: baseType,
             angle: angle,
             stops: stops,
-            harmony: harmony,
-            themeIdx: themeIdx
+            secondaryCount: secondaryCount,
+            glowIntensity: glowIntensity
         };
     }
 
     function createGradientSignature(params) {
         var parts = [];
-        parts.push(params.type === "radial" ? "RAD" : ("LIN_A" + Math.round(params.angle / 15) * 15));
+        parts.push("T" + params.themeIdx);
+        parts.push("A_" + params.archetype);
+        parts.push(params.baseType === "radial" ? "RAD" : ("LIN_" + params.angle));
         parts.push("S" + params.stops.length);
         for (var i = 0; i < params.stops.length; i++) {
             var s = params.stops[i];
@@ -6071,15 +6119,15 @@
         var th = (threshold !== undefined) ? threshold : 35;
         for (var i = 0; i < acceptedList.length; i++) {
             var acc = acceptedList[i];
-            if (acc.type !== candidateParams.type) continue;
+            if (acc.archetype !== candidateParams.archetype && acc.baseType !== candidateParams.baseType) continue;
 
-            if (candidateParams.type === "linear") {
+            if (candidateParams.baseType === "linear" && acc.baseType === "linear") {
                 var angleDiff = Math.abs(candidateParams.angle - acc.angle) % 180;
                 if (angleDiff > 90) angleDiff = 180 - angleDiff;
-                if (angleDiff > 30) continue;
+                if (angleDiff > 35) continue;
             }
 
-            var samplePoints = [0, 25, 50, 75, 100];
+            var samplePoints = [0, 15, 35, 50, 65, 85, 100];
             var totalDist = 0;
             for (var p = 0; p < samplePoints.length; p++) {
                 var c1 = sampleGradientColor(candidateParams.stops, samplePoints[p]);
@@ -6137,27 +6185,36 @@
         return doc;
     }
 
-    function createGradientArtwork(doc, width, height, gradParams) {
+    function createGradientArtwork(doc, width, height, gradParams, advSettings) {
         width = Math.round(Number(width));
         height = Math.round(Number(height));
         var rng = createGradientPRNG(gradParams.seed);
+        var adv = advSettings || {};
+        var intensity = gradParams.glowIntensity || 1.0;
 
-        // আর্টবোর্ডের সীমানা নির্ধারণ
+        // Set exact artboard boundary
         var ab = doc.artboards[0];
         ab.artboardRect = [0, height, width, 0];
 
         // ---------------------------------------------------------
-        // 1. বেইজ ব্যাকগ্রাউন্ড গ্রেডিয়েন্ট তৈরি
+        // MASTER ARTWORK GROUP WITH CLIPPING MASK
+        // Guarantees 0% bleed onto canvas/pasteboard outside artboard
+        // ---------------------------------------------------------
+        var masterGroup = doc.groupItems.add();
+        masterGroup.name = "Automation_Suite_Gradient_Art";
+
+        // ---------------------------------------------------------
+        // 1. BASE BACKGROUND GRADIENT (FULL-BLEED RECTANGLE)
         // ---------------------------------------------------------
         var baseGrad = doc.gradients.add();
         baseGrad.name = "BaseGrad_" + (new Date().getTime()) + "_" + Math.floor(rng() * 1000000);
-        baseGrad.type = (gradParams.type === "radial") ? GradientType.RADIAL : GradientType.LINEAR;
+        baseGrad.type = (gradParams.baseType === "radial") ? GradientType.RADIAL : GradientType.LINEAR;
 
         var stops = gradParams.stops;
         while (baseGrad.gradientStops.length < stops.length) {
             baseGrad.gradientStops.add();
         }
-        
+
         for (var s = 0; s < stops.length; s++) {
             var stop = baseGrad.gradientStops[s];
             stop.rampPoint = Math.max(0, Math.min(100, stops[s].rampPoint));
@@ -6165,76 +6222,356 @@
             var c = new RGBColor();
             c.red = stops[s].r; c.green = stops[s].g; c.blue = stops[s].b;
             stop.color = c;
-            try { stop.opacity = 100.0; } catch(e){}
+            try { stop.opacity = 100.0; } catch (e) {}
         }
 
-        var rect = doc.pathItems.rectangle(height, 0, width, height);
-        rect.stroked = false;
-        rect.filled = true;
+        var baseRect = masterGroup.pathItems.rectangle(height, 0, width, height);
+        baseRect.name = "Background_Base_Rectangle";
+        baseRect.stroked = false;
+        baseRect.filled = true;
 
         var gradColor = new GradientColor();
         gradColor.gradient = baseGrad;
         gradColor.angle = gradParams.angle || 0;
-        rect.fillColor = gradColor;
+        baseRect.fillColor = gradColor;
 
         // ---------------------------------------------------------
-        // 2. অ্যান্টিগ্রাভিটি গ্লোয়িং অরবস / মেশ লেয়ারস তৈরি
+        // 2. SECONDARY PROCEDURAL COMPOSITION LAYERS
         // ---------------------------------------------------------
-        var numOrbs = 4 + Math.floor(rng() * 6);
+        var arch = gradParams.archetype || "orb_glow";
 
-        for (var o = 0; o < numOrbs; o++) {
-            var orbGrad = doc.gradients.add();
-            orbGrad.name = "OrbGrad_" + o + "_" + (new Date().getTime()) + Math.floor(rng() * 10000);
-            orbGrad.type = GradientType.RADIAL;
-            
-            if (orbGrad.gradientStops.length < 2) orbGrad.gradientStops.add();
-            
-            var baseStop = stops[Math.floor(rng() * stops.length)];
-            var orbColor = new RGBColor();
-            orbColor.red = Math.min(255, baseStop.r + 30 + (rng() * 20));
-            orbColor.green = Math.min(255, baseStop.g + 30 + (rng() * 20));
-            orbColor.blue = Math.min(255, baseStop.b + 30 + (rng() * 20));
+        var blendScreen = (typeof BlendModes !== "undefined" && BlendModes.SCREEN) ? BlendModes.SCREEN : BlendModes.NORMAL;
+        var blendColorDodge = (typeof BlendModes !== "undefined" && BlendModes.COLORDODGE) ? BlendModes.COLORDODGE : blendScreen;
+        var blendLighten = (typeof BlendModes !== "undefined" && BlendModes.LIGHTEN) ? BlendModes.LIGHTEN : blendScreen;
+        var blendOverlay = (typeof BlendModes !== "undefined" && BlendModes.OVERLAY) ? BlendModes.OVERLAY : blendScreen;
+        var blendSoftLight = (typeof BlendModes !== "undefined" && BlendModes.SOFTLIGHT) ? BlendModes.SOFTLIGHT : blendOverlay;
 
-            var innerStop = orbGrad.gradientStops[0];
-            innerStop.rampPoint = 0;
-            innerStop.color = orbColor;
-            try { innerStop.opacity = 70.0 + (rng() * 30); } catch(e){}
+        var numLayers = gradParams.secondaryCount || 4;
 
-            var outerStop = orbGrad.gradientStops[1];
-            outerStop.rampPoint = 100;
-            outerStop.color = orbColor;
-            try { outerStop.opacity = 0.0; } catch(e){}
+        // ARCHETYPE A: Glowing Orbs / Diffused Light Spheres
+        if (arch === "orb_glow") {
+            for (var o = 0; o < numLayers; o++) {
+                var orbGrad = doc.gradients.add();
+                orbGrad.name = "OrbGrad_" + o + "_" + (new Date().getTime()) + "_" + Math.floor(rng() * 10000);
+                orbGrad.type = GradientType.RADIAL;
 
-            var orbSizeW = (width * 0.4) + (rng() * width * 0.8);
-            var orbSizeH = (height * 0.4) + (rng() * height * 0.8);
-            
-            var posX = (rng() * width) - (orbSizeW * 0.3);
-            var posY = height - (rng() * height) + (orbSizeH * 0.3);
+                if (orbGrad.gradientStops.length < 2) orbGrad.gradientStops.add();
 
-            var orb = doc.pathItems.ellipse(posY, posX, orbSizeW, orbSizeH);
-            orb.stroked = false;
-            orb.filled = true;
-            
-            var oGradColor = new GradientColor();
-            oGradColor.gradient = orbGrad;
-            
-            try {
-                var matrix = app.getScaleMatrix(100, 100);
-                matrix = app.concatenateRotationMatrix(matrix, rng() * 360);
-                orb.transform(matrix, true, true, true, true, 0.5);
-            } catch(e) {}
-            
-            orb.fillColor = oGradColor;
-            
-            try {
-                var colDodge = (typeof BlendModes !== "undefined" && BlendModes.COLORDODGE) ? BlendModes.COLORDODGE : BlendModes.SCREEN;
-                var blendModes = [BlendModes.SCREEN, colDodge, BlendModes.LIGHTEN, BlendModes.OVERLAY];
-                orb.blendingMode = blendModes[Math.floor(rng() * blendModes.length)];
-                orb.opacity = 40 + (rng() * 50);
-            } catch(e){}
+                var baseStop = stops[Math.floor(rng() * stops.length)];
+                var orbColor = new RGBColor();
+                orbColor.red = Math.min(255, Math.max(0, Math.round(baseStop.r + (rng() * 40 - 10))));
+                orbColor.green = Math.min(255, Math.max(0, Math.round(baseStop.g + (rng() * 40 - 10))));
+                orbColor.blue = Math.min(255, Math.max(0, Math.round(baseStop.b + (rng() * 40 - 10))));
+
+                var innerStop = orbGrad.gradientStops[0];
+                innerStop.rampPoint = 0;
+                innerStop.color = orbColor;
+                try { innerStop.opacity = Math.min(100, (65.0 + rng() * 35) * intensity); } catch (e) {}
+
+                var outerStop = orbGrad.gradientStops[1];
+                outerStop.rampPoint = 100;
+                outerStop.color = orbColor;
+                try { outerStop.opacity = 0.0; } catch (e) {}
+
+                var orbSizeW = (width * 0.30) + (rng() * width * 0.45);
+                var orbSizeH = (height * 0.30) + (rng() * height * 0.45);
+
+                var posX = (rng() * (width - orbSizeW * 0.6));
+                var posY = height - (rng() * (height - orbSizeH * 0.6));
+
+                var orb = masterGroup.pathItems.ellipse(posY, posX, orbSizeW, orbSizeH);
+                orb.name = "Glow_Orb_" + (o + 1);
+                orb.stroked = false;
+                orb.filled = true;
+
+                var oGradColor = new GradientColor();
+                oGradColor.gradient = orbGrad;
+                orb.fillColor = oGradColor;
+
+                try {
+                    var matrix = app.getScaleMatrix(100, 100);
+                    matrix = app.concatenateRotationMatrix(matrix, rng() * 360);
+                    orb.transform(matrix, true, true, true, true, 0.5);
+                } catch (eTr) {}
+
+                try {
+                    var orbBlends = [blendScreen, blendColorDodge, blendLighten, blendOverlay];
+                    orb.blendingMode = orbBlends[Math.floor(rng() * orbBlends.length)];
+                    orb.opacity = Math.min(100, Math.max(25, (40 + rng() * 45) * intensity));
+                } catch (eBl) {}
+            }
+        }
+        // ARCHETYPE B: Fluid Abstract Gradient Shapes
+        else if (arch === "fluid_abstract") {
+            var fluidCount = Math.max(3, numLayers);
+            for (var f = 0; f < fluidCount; f++) {
+                var fGrad = doc.gradients.add();
+                fGrad.name = "FluidGrad_" + f + "_" + (new Date().getTime()) + "_" + Math.floor(rng() * 10000);
+                fGrad.type = (rng() < 0.4) ? GradientType.RADIAL : GradientType.LINEAR;
+
+                while (fGrad.gradientStops.length < 3) fGrad.gradientStops.add();
+
+                var st1 = stops[Math.floor(rng() * stops.length)];
+                var st2 = stops[Math.floor(rng() * stops.length)];
+
+                var col1 = new RGBColor();
+                col1.red = Math.min(255, Math.max(0, st1.r + Math.round(rng() * 30 - 15)));
+                col1.green = Math.min(255, Math.max(0, st1.g + Math.round(rng() * 30 - 15)));
+                col1.blue = Math.min(255, Math.max(0, st1.b + Math.round(rng() * 30 - 15)));
+
+                var col2 = new RGBColor();
+                col2.red = Math.min(255, Math.max(0, st2.r + Math.round(rng() * 30 - 15)));
+                col2.green = Math.min(255, Math.max(0, st2.g + Math.round(rng() * 30 - 15)));
+                col2.blue = Math.min(255, Math.max(0, st2.b + Math.round(rng() * 30 - 15)));
+
+                fGrad.gradientStops[0].rampPoint = 0;
+                fGrad.gradientStops[0].color = col1;
+                try { fGrad.gradientStops[0].opacity = Math.min(100, (70 + rng() * 30) * intensity); } catch (e) {}
+
+                fGrad.gradientStops[1].rampPoint = 50;
+                fGrad.gradientStops[1].color = col2;
+                try { fGrad.gradientStops[1].opacity = Math.min(100, (50 + rng() * 30) * intensity); } catch (e) {}
+
+                fGrad.gradientStops[2].rampPoint = 100;
+                fGrad.gradientStops[2].color = col1;
+                try { fGrad.gradientStops[2].opacity = 0.0; } catch (e) {}
+
+                var fw = (width * 0.45) + (rng() * width * 0.45);
+                var fh = (height * 0.45) + (rng() * height * 0.45);
+                var fx = (rng() * (width - fw * 0.5));
+                var fy = height - (rng() * (height - fh * 0.5));
+
+                var fluidShape = masterGroup.pathItems.ellipse(fy, fx, fw, fh);
+                fluidShape.name = "Fluid_Band_" + (f + 1);
+                fluidShape.stroked = false;
+                fluidShape.filled = true;
+
+                var fGradCol = new GradientColor();
+                fGradCol.gradient = fGrad;
+                fGradCol.angle = Math.floor(rng() * 12) * 30;
+                fluidShape.fillColor = fGradCol;
+
+                try {
+                    var fMat = app.getScaleMatrix(100 + rng() * 30, 80 + rng() * 30);
+                    fMat = app.concatenateRotationMatrix(fMat, rng() * 360);
+                    fluidShape.transform(fMat, true, true, true, true, 0.5);
+                } catch (eTrF) {}
+
+                try {
+                    var fBlends = [blendOverlay, blendScreen, blendSoftLight, blendColorDodge];
+                    fluidShape.blendingMode = fBlends[Math.floor(rng() * fBlends.length)];
+                    fluidShape.opacity = Math.min(100, Math.max(30, (40 + rng() * 40) * intensity));
+                } catch (eBlF) {}
+            }
+        }
+        // ARCHETYPE C: Aurora Light Waves
+        else if (arch === "aurora_waves") {
+            var auroraCount = Math.max(3, numLayers);
+            for (var a = 0; a < auroraCount; a++) {
+                var aGrad = doc.gradients.add();
+                aGrad.name = "AuroraGrad_" + a + "_" + (new Date().getTime()) + "_" + Math.floor(rng() * 10000);
+                aGrad.type = GradientType.LINEAR;
+
+                while (aGrad.gradientStops.length < 3) aGrad.gradientStops.add();
+
+                var aStop = stops[a % stops.length];
+                var aCol = new RGBColor();
+                aCol.red = aStop.r;
+                aCol.green = aStop.g;
+                aCol.blue = aStop.b;
+
+                aGrad.gradientStops[0].rampPoint = 0;
+                aGrad.gradientStops[0].color = aCol;
+                try { aGrad.gradientStops[0].opacity = 0.0; } catch (e) {}
+
+                aGrad.gradientStops[1].rampPoint = Math.round(35 + rng() * 30);
+                aGrad.gradientStops[1].color = aCol;
+                try { aGrad.gradientStops[1].opacity = Math.min(100, (75 + rng() * 25) * intensity); } catch (e) {}
+
+                aGrad.gradientStops[2].rampPoint = 100;
+                aGrad.gradientStops[2].color = aCol;
+                try { aGrad.gradientStops[2].opacity = 0.0; } catch (e) {}
+
+                // Keep wave bounds centered and proportional to artboard
+                var aw = width * (0.95 + rng() * 0.15);
+                var ah = height * (0.22 + rng() * 0.28);
+                var ax = (width - aw) / 2 + (rng() * width * 0.08 - width * 0.04);
+                var ay = height * (0.15 + (a / Math.max(1, auroraCount)) * 0.70);
+
+                var wave = masterGroup.pathItems.ellipse(ay, ax, aw, ah);
+                wave.name = "Aurora_Wave_" + (a + 1);
+                wave.stroked = false;
+                wave.filled = true;
+
+                var aGradCol = new GradientColor();
+                aGradCol.gradient = aGrad;
+                aGradCol.angle = Math.round(-15 + rng() * 30);
+                wave.fillColor = aGradCol;
+
+                try {
+                    var aMat = app.getScaleMatrix(100, 75);
+                    aMat = app.concatenateRotationMatrix(aMat, Math.round(-12 + rng() * 24));
+                    wave.transform(aMat, true, true, true, true, 0.5);
+                } catch (eTrA) {}
+
+                try {
+                    wave.blendingMode = (rng() < 0.6) ? blendScreen : blendColorDodge;
+                    wave.opacity = Math.min(100, Math.max(35, (50 + rng() * 40) * intensity));
+                } catch (eBlA) {}
+            }
+        }
+        // ARCHETYPE D: Holographic Sheen
+        else if (arch === "holographic_sheen") {
+            var sheenCount = Math.max(3, numLayers);
+            for (var h = 0; h < sheenCount; h++) {
+                var hGrad = doc.gradients.add();
+                hGrad.name = "HoloGrad_" + h + "_" + (new Date().getTime()) + "_" + Math.floor(rng() * 10000);
+                hGrad.type = GradientType.LINEAR;
+
+                while (hGrad.gradientStops.length < 4) hGrad.gradientStops.add();
+
+                for (var hs = 0; hs < 4; hs++) {
+                    var hStopSrc = stops[(h + hs) % stops.length];
+                    var hRgb = new RGBColor();
+                    hRgb.red = hStopSrc.r; hRgb.green = hStopSrc.g; hRgb.blue = hStopSrc.b;
+                    var hStop = hGrad.gradientStops[hs];
+                    hStop.rampPoint = hs * 33;
+                    hStop.color = hRgb;
+                    try {
+                        hStop.opacity = (hs === 1 || hs === 2) ? Math.min(100, 80 * intensity) : 0;
+                    } catch (e) {}
+                }
+
+                var hw = width * (1.02 + rng() * 0.10);
+                var hh = height * (0.25 + rng() * 0.30);
+                var hx = (width - hw) / 2;
+                var hy = height * (0.15 + (h / Math.max(1, sheenCount)) * 0.70);
+
+                var sheen = masterGroup.pathItems.rectangle(hy, hx, hw, hh);
+                sheen.name = "Holo_Sheen_" + (h + 1);
+                sheen.stroked = false;
+                sheen.filled = true;
+
+                var hGradCol = new GradientColor();
+                hGradCol.gradient = hGrad;
+                hGradCol.angle = Math.round(25 + rng() * 50);
+                sheen.fillColor = hGradCol;
+
+                try {
+                    var hMat = app.getScaleMatrix(100, 100);
+                    hMat = app.concatenateRotationMatrix(hMat, Math.round(-18 + rng() * 36));
+                    sheen.transform(hMat, true, true, true, true, 0.5);
+                } catch (eTrH) {}
+
+                try {
+                    sheen.blendingMode = (rng() < 0.5) ? blendOverlay : blendScreen;
+                    sheen.opacity = Math.min(100, Math.max(30, (45 + rng() * 40) * intensity));
+                } catch (eBlH) {}
+            }
+        }
+        // ARCHETYPE E: Deep Space Cosmic Centers
+        else {
+            var coreCount = 1 + Math.floor(rng() * 2);
+            for (var cIdx = 0; cIdx < coreCount; cIdx++) {
+                var cGrad = doc.gradients.add();
+                cGrad.name = "CosmicCoreGrad_" + cIdx + "_" + (new Date().getTime()) + "_" + Math.floor(rng() * 10000);
+                cGrad.type = GradientType.RADIAL;
+
+                while (cGrad.gradientStops.length < 3) cGrad.gradientStops.add();
+
+                var coreCol = new RGBColor();
+                var brightStop = stops[stops.length - 1];
+                coreCol.red = Math.min(255, brightStop.r + 20);
+                coreCol.green = Math.min(255, brightStop.g + 20);
+                coreCol.blue = Math.min(255, brightStop.b + 20);
+
+                cGrad.gradientStops[0].rampPoint = 0;
+                cGrad.gradientStops[0].color = coreCol;
+                try { cGrad.gradientStops[0].opacity = Math.min(100, 95 * intensity); } catch (e) {}
+
+                cGrad.gradientStops[1].rampPoint = 40;
+                cGrad.gradientStops[1].color = coreCol;
+                try { cGrad.gradientStops[1].opacity = Math.min(100, 45 * intensity); } catch (e) {}
+
+                cGrad.gradientStops[2].rampPoint = 100;
+                cGrad.gradientStops[2].color = coreCol;
+                try { cGrad.gradientStops[2].opacity = 0.0; } catch (e) {}
+
+                var cw = width * (0.5 + rng() * 0.35);
+                var ch = height * (0.5 + rng() * 0.35);
+                var cx = (width - cw) / 2 + (rng() * width * 0.15 - width * 0.075);
+                var cy = height - (height - ch) / 2 + (rng() * height * 0.15 - height * 0.075);
+
+                var core = masterGroup.pathItems.ellipse(cy, cx, cw, ch);
+                core.name = "Cosmic_Core_" + (cIdx + 1);
+                core.stroked = false;
+                core.filled = true;
+
+                var cGradCol = new GradientColor();
+                cGradCol.gradient = cGrad;
+                core.fillColor = cGradCol;
+
+                try {
+                    core.blendingMode = blendColorDodge;
+                    core.opacity = Math.min(100, Math.max(40, 70 * intensity));
+                } catch (eBlC) {}
+            }
+
+            var starCount = 3 + Math.floor(rng() * 4);
+            for (var sIdx = 0; sIdx < starCount; sIdx++) {
+                var sGrad = doc.gradients.add();
+                sGrad.name = "NebulaGlow_" + sIdx + "_" + (new Date().getTime()) + "_" + Math.floor(rng() * 10000);
+                sGrad.type = GradientType.RADIAL;
+                if (sGrad.gradientStops.length < 2) sGrad.gradientStops.add();
+
+                var randStop = stops[Math.floor(rng() * stops.length)];
+                var starCol = new RGBColor();
+                starCol.red = randStop.r; starCol.green = randStop.g; starCol.blue = randStop.b;
+
+                sGrad.gradientStops[0].rampPoint = 0;
+                sGrad.gradientStops[0].color = starCol;
+                try { sGrad.gradientStops[0].opacity = Math.min(100, 80 * intensity); } catch (e) {}
+
+                sGrad.gradientStops[1].rampPoint = 100;
+                sGrad.gradientStops[1].color = starCol;
+                try { sGrad.gradientStops[1].opacity = 0.0; } catch (e) {}
+
+                var sw = width * (0.15 + rng() * 0.25);
+                var sh = height * (0.15 + rng() * 0.25);
+                var sx = (rng() * (width - sw * 0.5));
+                var sy = height - (rng() * (height - sh * 0.5));
+
+                var star = masterGroup.pathItems.ellipse(sy, sx, sw, sh);
+                star.name = "Nebula_Orb_" + (sIdx + 1);
+                star.stroked = false;
+                star.filled = true;
+
+                var sGradCol = new GradientColor();
+                sGradCol.gradient = sGrad;
+                star.fillColor = sGradCol;
+
+                try {
+                    star.blendingMode = (rng() < 0.5) ? blendScreen : blendColorDodge;
+                    star.opacity = Math.min(100, Math.max(30, 60 * intensity));
+                } catch (eBlS) {}
+            }
         }
 
-        return rect;
+        // ---------------------------------------------------------
+        // 3. ARTBOARD CLIPPING MASK (STRICT BOUNDARY CONTAINMENT)
+        // ---------------------------------------------------------
+        var clipMask = masterGroup.pathItems.rectangle(height, 0, width, height);
+        clipMask.name = "Artboard_Clip_Mask";
+        clipMask.stroked = false;
+        clipMask.filled = false;
+        try {
+            clipMask.zOrder(ZOrderMethod.BRINGTOFRONT);
+        } catch (eZ) {}
+        try {
+            masterGroup.clipped = true;
+        } catch (eClp) {}
+
+        return baseRect;
     }
 
     function validateAndEnforceGradientArtboard(doc, reqW, reqH) {
@@ -6249,7 +6586,6 @@
         var curW = Math.round(Math.abs(curRect[2] - curRect[0]));
         var curH = Math.round(Math.abs(curRect[1] - curRect[3]));
 
-        // If dimensions don't match exactly, correct the document dimensions
         if (curW !== reqW || curH !== reqH) {
             ab.artboardRect = [0, reqH, reqW, 0];
             curRect = ab.artboardRect;
@@ -6261,15 +6597,30 @@
             throw new Error("Dimension validation failed: actual (" + curW + "x" + curH + ") !== requested (" + reqW + "x" + reqH + ")");
         }
 
-        // Ensure artwork completely fills the final artboard with no margin or border
+        // Ensure base rectangle and clip mask match exact artboard dimensions [0, reqH, reqW, 0]
         for (var i = 0; i < doc.pathItems.length; i++) {
             var item = doc.pathItems[i];
-            if (item.filled) {
+            if (item.name === "Background_Base_Rectangle") {
                 item.left = 0;
                 item.top = reqH;
                 item.width = reqW;
                 item.height = reqH;
                 item.stroked = false;
+            } else if (item.name === "Artboard_Clip_Mask") {
+                item.left = 0;
+                item.top = reqH;
+                item.width = reqW;
+                item.height = reqH;
+                item.stroked = false;
+                item.filled = false;
+            }
+        }
+
+        // Ensure clipping mask is active on the master group
+        for (var g = 0; g < doc.groupItems.length; g++) {
+            var grp = doc.groupItems[g];
+            if (grp.name === "Automation_Suite_Gradient_Art") {
+                try { grp.clipped = true; } catch (eCl) {}
             }
         }
 
@@ -6368,6 +6719,118 @@
         jpgOpts.horizontalScale = 100.0;
         jpgOpts.verticalScale = 100.0;
         doc.exportFile(targetFile, ExportType.JPEG, jpgOpts);
+    }
+
+    function previewSingleGradient(settings) {
+        var width = Math.round(Number(settings.width)) || 4000;
+        var height = Math.round(Number(settings.height)) || 2663;
+        var themeIdx = (settings.themeIndex !== undefined) ? settings.themeIndex : 0;
+        var adv = settings.advanced || {};
+
+        var seed = adv.customSeed ? (parseInt(adv.customSeed, 10) || (new Date().getTime())) : ((new Date().getTime()) + Math.floor(Math.random() * 1000000));
+        var params = generateGradientParameters(seed, 0, themeIdx, adv);
+
+        var doc = null;
+        try {
+            doc = createGradientDocument(width, height);
+            createGradientArtwork(doc, width, height, params, adv);
+            validateAndEnforceGradientArtboard(doc, width, height);
+            try { app.redraw(); } catch (eRd) {}
+            showModernAlert("Preview Created", "Generated 1 sample gradient (" + (params.archetype.replace(/_/g, " ")) + ").\nYou can inspect its layers in Adobe Illustrator.", "info");
+        } catch (ePrev) {
+            if (doc) {
+                try { doc.close(SaveOptions.DONOTSAVECHANGES); } catch (eC) {}
+            }
+            showModernAlert("Preview Failed", "Could not generate preview:\n" + ePrev.message, "error");
+        }
+    }
+
+    function showGradientAdvancedSettingsDialog(currentAdv, onSave) {
+        currentAdv = currentAdv || {};
+        var advDlg = new Window("dialog", "Gradient Maker - Advanced Procedural Settings");
+        advDlg.orientation = "column";
+        advDlg.alignChildren = ["fill", "top"];
+        advDlg.spacing = 10;
+        advDlg.margins = [18, 16, 18, 16];
+        advDlg.preferredSize.width = 380;
+
+        var pnlAdv = advDlg.add("panel", undefined, " Procedural Engine Controls ");
+        pnlAdv.orientation = "column";
+        pnlAdv.alignChildren = ["fill", "top"];
+        pnlAdv.spacing = 8;
+        pnlAdv.margins = [14, 14, 14, 12];
+
+        var grpSens = pnlAdv.add("group");
+        grpSens.orientation = "row";
+        grpSens.alignChildren = ["left", "center"];
+        var lblSens = grpSens.add("statictext", undefined, "Uniqueness Sensitivity:");
+        lblSens.preferredSize.width = 150;
+        var ddSens = grpSens.add("dropdownlist", undefined, ["Strict (Distinct)", "Normal (Balanced)", "Relaxed (Permissive)"]);
+        ddSens.preferredSize.width = 160;
+        if (currentAdv.sensitivity === "strict") ddSens.selection = 0;
+        else if (currentAdv.sensitivity === "relaxed") ddSens.selection = 2;
+        else ddSens.selection = 1;
+
+        var grpComp = pnlAdv.add("group");
+        grpComp.orientation = "row";
+        grpComp.alignChildren = ["left", "center"];
+        var lblComp = grpComp.add("statictext", undefined, "Color Complexity:");
+        lblComp.preferredSize.width = 150;
+        var ddComp = grpComp.add("dropdownlist", undefined, ["Minimal (2–3 stops)", "Balanced (3–5 stops)", "Rich (5–7 stops)"]);
+        ddComp.preferredSize.width = 160;
+        if (currentAdv.complexity === "minimal") ddComp.selection = 0;
+        else if (currentAdv.complexity === "rich") ddComp.selection = 2;
+        else ddComp.selection = 1;
+
+        var grpGlow = pnlAdv.add("group");
+        grpGlow.orientation = "row";
+        grpGlow.alignChildren = ["left", "center"];
+        var lblGlow = grpGlow.add("statictext", undefined, "Glow / Effects Intensity:");
+        lblGlow.preferredSize.width = 150;
+        var ddGlow = grpGlow.add("dropdownlist", undefined, ["Subtle (60%)", "Normal (100%)", "Vibrant (140%)"]);
+        ddGlow.preferredSize.width = 160;
+        if (currentAdv.glowIntensity === "subtle") ddGlow.selection = 0;
+        else if (currentAdv.glowIntensity === "vibrant") ddGlow.selection = 2;
+        else ddGlow.selection = 1;
+
+        var grpSeed = pnlAdv.add("group");
+        grpSeed.orientation = "row";
+        grpSeed.alignChildren = ["left", "center"];
+        var lblSeed = grpSeed.add("statictext", undefined, "Custom Seed (Optional):");
+        lblSeed.preferredSize.width = 150;
+        var txtSeed = grpSeed.add("edittext", undefined, currentAdv.customSeed || "");
+        txtSeed.preferredSize.width = 160;
+
+        var grpBtns = advDlg.add("group");
+        grpBtns.orientation = "row";
+        grpBtns.alignChildren = ["right", "center"];
+        grpBtns.spacing = 10;
+        var btnCancel = grpBtns.add("button", undefined, "Cancel");
+        var btnApply = grpBtns.add("button", undefined, "Apply", { name: "ok" });
+
+        btnApply.onClick = function () {
+            var sensKey = (ddSens.selection && ddSens.selection.index === 0) ? "strict" : ((ddSens.selection && ddSens.selection.index === 2) ? "relaxed" : "normal");
+            var compKey = (ddComp.selection && ddComp.selection.index === 0) ? "minimal" : ((ddComp.selection && ddComp.selection.index === 2) ? "rich" : "balanced");
+            var glowKey = (ddGlow.selection && ddGlow.selection.index === 0) ? "subtle" : ((ddGlow.selection && ddGlow.selection.index === 2) ? "vibrant" : "normal");
+            var seedVal = txtSeed.text ? txtSeed.text.replace(/[^0-9]/g, "") : "";
+
+            var updated = {
+                sensitivity: sensKey,
+                complexity: compKey,
+                glowIntensity: glowKey,
+                customSeed: seedVal
+            };
+            advDlg.close(1);
+            if (typeof onSave === "function") {
+                onSave(updated);
+            }
+        };
+
+        btnCancel.onClick = function () {
+            advDlg.close(0);
+        };
+
+        advDlg.show();
     }
 
     function showGradientCompletionDialog(info) {
@@ -6485,6 +6948,7 @@
         var themeName = gSettings.themeName || "All Themes (Random Mix)";
         var outFolder = new Folder(gSettings.outputFolder || config.outputFolder);
         var format = (gSettings.format || "svg").toLowerCase();
+        var adv = gSettings.advanced || {};
 
         if (!outFolder.exists) {
             outFolder.create();
@@ -6526,14 +6990,22 @@
         var savedCount = 0;
         var errors = [];
 
+        var baseThreshold = 35;
+        if (adv.sensitivity === "strict") baseThreshold = 45;
+        else if (adv.sensitivity === "relaxed") baseThreshold = 25;
+
         for (var pageIdx = 0; pageIdx < pageCount; pageIdx++) {
             var candidate = null;
             var retries = 0;
             var maxRetries = 60;
 
             while (!candidate && retries < maxRetries) {
-                var seed = (new Date().getTime()) + (pageIdx * 10007) + (retries * 7919) + Math.floor(Math.random() * 1000000);
-                var testParams = generateGradientParameters(seed, retries, themeIdx);
+                var seed = (new Date().getTime()) + (pageIdx * 65537) + (retries * 31337) + Math.floor(Math.random() * 1000000);
+                if (adv.customSeed && pageIdx === 0 && retries === 0) {
+                    seed = parseInt(adv.customSeed, 10);
+                }
+
+                var testParams = generateGradientParameters(seed, retries, themeIdx, adv);
                 var sig = createGradientSignature(testParams);
 
                 if (acceptedSignatures[sig]) {
@@ -6542,7 +7014,7 @@
                     continue;
                 }
 
-                var threshold = (retries > 45) ? 20 : 35;
+                var threshold = (retries > 40) ? Math.max(15, baseThreshold - 15) : baseThreshold;
                 if (isGradientTooSimilar(testParams, acceptedGradients, threshold)) {
                     rejectedCount++;
                     retries++;
@@ -6555,7 +7027,7 @@
 
             if (!candidate) {
                 var fallbackSeed = (new Date().getTime()) + Math.floor(Math.random() * 9999999);
-                candidate = generateGradientParameters(fallbackSeed, retries + 10, themeIdx);
+                candidate = generateGradientParameters(fallbackSeed, retries + 10, themeIdx, adv);
             }
 
             acceptedGradients.push(candidate);
@@ -6566,7 +7038,7 @@
                 doc = createGradientDocument(width, height);
 
                 // 2. Create gradient artwork that fills 100% of artboard edge to edge
-                createGradientArtwork(doc, width, height, candidate);
+                createGradientArtwork(doc, width, height, candidate, adv);
 
                 // 3. Final dimension validation before exporting
                 validateAndEnforceGradientArtboard(doc, width, height);
@@ -7747,6 +8219,21 @@
         ddGradTheme.selection = 0;
         ddGradTheme.preferredSize.width = 240;
 
+        var gradAdvSettings = {
+            sensitivity: "normal",
+            complexity: "balanced",
+            glowIntensity: "normal",
+            customSeed: ""
+        };
+
+        var btnGradAdv = rowGradTheme.add("button", undefined, "⚡ Advanced");
+        btnGradAdv.preferredSize = [105, 24];
+        btnGradAdv.onClick = function () {
+            showGradientAdvancedSettingsDialog(gradAdvSettings, function (newSettings) {
+                gradAdvSettings = newSettings;
+            });
+        };
+
         // C. Page Count Row
         var rowGradPages = pnlGradMain.add("group");
         rowGradPages.orientation = "row";
@@ -7815,11 +8302,11 @@
             }
         };
 
-        // D. Save Format Panel (Radio Buttons: EPS, SVG [default], JPG, PNG)
+        // D. Save Format Panel (Radio Buttons: EPS, SVG [default], JPG, PNG + Quick Preview)
         var pnlGradFmt = pnlGradMain.add("panel", undefined, "Save Format");
         pnlGradFmt.orientation = "row";
         pnlGradFmt.alignChildren = ["left", "center"];
-        pnlGradFmt.spacing = 28;
+        pnlGradFmt.spacing = 22;
         pnlGradFmt.margins = [14, 6, 14, 6];
 
         var rbGradEPS = pnlGradFmt.add("radiobutton", undefined, "EPS");
@@ -7827,6 +8314,36 @@
         var rbGradJPG = pnlGradFmt.add("radiobutton", undefined, "JPG");
         var rbGradPNG = pnlGradFmt.add("radiobutton", undefined, "PNG");
         rbGradSVG.value = true;
+
+        var grpFmtSpacer = pnlGradFmt.add("group");
+        grpFmtSpacer.alignment = ["fill", "center"];
+
+        var btnGradPreview = pnlGradFmt.add("button", undefined, "👁️ Preview");
+        btnGradPreview.preferredSize = [95, 22];
+        btnGradPreview.onClick = function () {
+            var pIdx = ddGradSize.selection ? ddGradSize.selection.index : 0;
+            var pW = 4000;
+            var pH = 2663;
+            if (pIdx === 0) { pW = 4000; pH = 2663; }
+            else if (pIdx === 1) { pW = 100; pH = 355; }
+            else if (pIdx === 2) { pW = 4000; pH = 4000; }
+            else {
+                pW = parseFloat(txtGradCustomW.text);
+                pH = parseFloat(txtGradCustomH.text);
+                if (isNaN(pW) || pW <= 0 || isNaN(pH) || pH <= 0) {
+                    pW = 4000; pH = 2663;
+                }
+            }
+            var tIdx = ddGradTheme.selection ? ddGradTheme.selection.index : 0;
+            var tName = ddGradTheme.selection ? ddGradTheme.selection.text : "All Themes (Random Mix)";
+            previewSingleGradient({
+                width: pW,
+                height: pH,
+                themeIndex: tIdx,
+                themeName: tName,
+                advanced: gradAdvSettings
+            });
+        };
 
         // Fixed-height bottom slot container for seamless tool switching without height changes
         var grpBottomSlot = dlg.add("group");
@@ -8103,7 +8620,8 @@
                         themeIndex: themeIdx,
                         themeName: themeName,
                         outputFolder: gradOutF.fsName,
-                        format: gradFmt
+                        format: gradFmt,
+                        advanced: gradAdvSettings
                     }
                 };
 
